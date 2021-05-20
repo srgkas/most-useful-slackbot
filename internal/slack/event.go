@@ -64,6 +64,17 @@ type Message struct {
 	ThreadTimestamp string            `json:"thread_ts"`
 }
 
-type Event interface {
 
+type Payload struct {
+	Event Event  `json:"event"`
+	Type  string `json:"type"`
+}
+
+type Event interface {
+	GetType() string
+	GetText() string
+	GetChannel() string
+	GetAttachments() []Attachment
+	GetBlocks() []json.RawMessage
+	GetTimestamp() string
 }
