@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	release := gh.NewRelease("https://github.com/my-repo", "v1.0.0")
-	releaser := gh.CreateReleaser("token")
+	release := gh.NewRelease("srgkas/most-useful-slackbot", "v0.0.1")
+	releaser := gh.CreateReleaser("")
 
 	err := releaser.Release(release)
 
