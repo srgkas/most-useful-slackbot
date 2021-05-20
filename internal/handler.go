@@ -18,3 +18,8 @@ func ReplyInHotfixThread(event slack.Event) error {
 	// reply logic
 	return nil
 }
+
+func ReleaseTag(event slack.Event) error {
+	//
+	return nil
+}

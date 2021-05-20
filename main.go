@@ -7,6 +7,7 @@ import (
 	slackgo "github.com/slack-go/slack"
 	"github.com/srgkas/most-useful-slackbot/internal"
 	"github.com/srgkas/most-useful-slackbot/internal/config"
+	"github.com/srgkas/most-useful-slackbot/internal/gh"
 	"github.com/srgkas/most-useful-slackbot/internal/slack"
 	"io/ioutil"
 	"net/http"
@@ -20,6 +21,7 @@ var handlersMap = map[string][]internal.Handler {
 	"as-deploy-prod": {
 		internal.Repost,
 		internal.ReplyInHotfixThread,
+		internal.ReleaseTag,
 	},
 	"as-deploy-prod-au": {
 		internal.ReplyInHotfixThread,
@@ -30,14 +32,17 @@ var handlersMap = map[string][]internal.Handler {
 }
 
 var slackClient *slackgo.Client
+var githubReleaser gh.Releaser
+var cfg *config.Config
 
 func main() {
-	cfg := config.CreateConfig()
+	cfg = config.CreateConfig()
 	fmt.Println(cfg)
 
 	r := mux.NewRouter()
 
 	initSlackClient()
+	initGithubReleaser()
 
 	r.HandleFunc("/events/handle", func (w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -83,8 +88,13 @@ func main() {
 }
 
 func initSlackClient() {
-	conf := config.CreateConfig().GetSlackToken()
+	conf := cfg.GetSlackToken()
 	slackClient = slackgo.New(conf.Value)
+}
+
+func initGithubReleaser() {
+	conf := cfg.GetGitToken()
+	githubReleaser = gh.NewReleaser(conf.Value)
 }
 
 func GetHandlers(e slack.Event) []internal.Handler {
