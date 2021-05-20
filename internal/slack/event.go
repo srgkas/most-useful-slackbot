@@ -64,7 +64,6 @@ type Message struct {
 	ThreadTimestamp string            `json:"thread_ts"`
 }
 
-
 type Payload struct {
 	Event Event  `json:"event"`
 	Type  string `json:"type"`
