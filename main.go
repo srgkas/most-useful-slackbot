@@ -6,8 +6,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, bitches!")
-
 	release := gh.NewRelease("https://github.com/my-repo", "v1.0.0")
 	releaser := gh.CreateReleaser("token")
 

@@ -1,8 +1,8 @@
 package gh
 
 import (
+	"fmt"
 	"github.com/google/go-github/v35/github"
-	"log"
 )
 
 // Release DTO
@@ -27,7 +27,7 @@ type GithubReleaser struct {
 }
 
 func (releaser GithubReleaser) Release(r *Release) error {
-	log.Printf("Released version: %s:%s\n", r.Repo, r.Tag)
+	fmt.Printf("Released version: %s:%s\n", r.Repo, r.Tag)
 
 	return nil
 }
