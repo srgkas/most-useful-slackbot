@@ -2,78 +2,62 @@ package slack
 
 import "encoding/json"
 
-type BlockType struct {
-	Type string `json:"type"`
-}
-
-type textWithType struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
-}
-
-type BlockText struct {
-	textWithType
-	Verbatim bool `json:"verbatim"`
-}
-
-type BlockElement struct {
-	Type string `json:"type"`
-	Elements []textWithType `json:"elements,omitempty"`
-}
-
-type BlockSection struct {
-	BlockType
-	Text BlockText `json:"text,omitempty"`
-}
-
-type BlockRichText struct {
-	BlockType
-	Elements []BlockElement `json:"elements,omitempty"`
-}
-
-func (b *BlockSection) GetTexts() []string {
-	return []string{b.Text.Text}
-}
-
-func (b *BlockRichText) GetTexts() []string {
-	var result []string
-
-	for _, e := range b.Elements {
-		for _, e := range e.Elements {
-			result = append(result, e.Text)
-		}
-	}
-
-	return result
-}
-
-type Auth struct {
-	BotID string `json:"bot_id"`
-}
-
-type Attachment struct {
-	ID     int            `json:"id"`
-	Blocks []BlockSection `json:"blocks"`
-}
-
-type Message struct {
-	Channel         string            `json:"channel"`
-	Text            string            `json:"text"`
-	Attachments     []Attachment      `json:"attachments,omitempty"`
-	Blocks          []json.RawMessage `json:"blocks,omitempty"`
-	ThreadTimestamp string            `json:"thread_ts"`
-}
-
 type Payload struct {
-	Event Event  `json:"event"`
-	Type  string `json:"type"`
+	Token          string
+	TeamId         string `json:"team_id"`
+	ApiAppId       string `json:"api_app_id"`
+	Event          Event  `json:"event"`
+	Type           string `json:"type"`
+	EventId        string `json:"event_id"`
+	EventTime      int    `json:"event_time"`
+	Authorizations []struct{
+		EnterpriseId string `json:"enterprise_id"`
+		TeamId string `json:"team_id"`
+		UserId string `json:"user_id"`
+		IsBot bool `json:"is_bot"`
+		IsEnterpriseInstall bool `json:"is_enterprise_install"`
+	}
+	IsExtSharedChannel bool `json:"is_ext_shared_channel"`
+	EventContext string `json:"event_context"`
 }
 
-type Event interface {
+type Event struct {
+	ClientMsgId string `json:"client_msg_id"`
+	Type string
+	Text string
+	User string
+	Ts string `json:"ts"`
+	Team string
+	Blocks []json.RawMessage
+	Channel string
+	EventTs string
+	ChannelType string
+}
+
+func (e *Event) GetType() string {
+	return e.Type
+}
+
+func (e *Event) GetText() string {
+	return e.Text
+}
+
+func (e *Event) GetChannel() string {
+	return e.Channel
+}
+
+func (e *Event) GetBlocks() []json.RawMessage {
+	return e.Blocks
+}
+
+func (e *Event) GetTimestamp() string {
+	return e.Ts
+}
+
+type EventGetterInterface interface {
 	GetType() string
 	GetText() string
 	GetChannel() string
-	GetAttachments() []Attachment
 	GetBlocks() []json.RawMessage
 	GetTimestamp() string
 }

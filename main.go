@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/srgkas/most-useful-slackbot/internal/slack"
 	"io/ioutil"
 	"net/http"
 )
@@ -34,5 +35,21 @@ func main() {
 		// event parsing goes here
 	})
 
-	http.ListenAndServe(":8000", r)
+	r.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
+		fmt.Println("New request from slack message")
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		var t slack.Payload
+		json.Unmarshal(b, &t)
+
+		fmt.Println("Original json:")
+		fmt.Println(string(b))
+
+		fmt.Println("Parsed structure:")
+		fmt.Printf("%+v\n", t)
+	}).Methods("POST")
+
+	http.ListenAndServe(":8080", r)
 }
