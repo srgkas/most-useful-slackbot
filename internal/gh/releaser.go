@@ -9,12 +9,16 @@ import (
 	"strings"
 )
 
+// Release DTO
 type Release struct {
 	RepoOwner string
 	RepoName string
 	Tag string
 }
 
+// NewRelease create release DTO
+// repo: {owner}/{name} srgkas/most-useful-slackbot
+// tag: v0.0.1
 func NewRelease(repo string, tag string) *Release {
 	owner, repoName := repoToOwnerRepoName(repo)
 
@@ -52,7 +56,6 @@ func (releaser GithubReleaser) Release(r *Release) error {
 }
 
 func NewReleaser(token string) Releaser {
-	// Context might be from outside. TBD
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -71,16 +74,6 @@ func repoToOwnerRepoName(repo string) (string, string) {
 	return parts[0], parts[1]
 }
 
-func getReleaseByTagInMemory(releases []*github.RepositoryRelease, tag string) (*github.RepositoryRelease, error) {
-	for _, release := range releases {
-		if *release.TagName == tag {
-			return release, nil
-		}
-	}
-
-	return nil, fmt.Errorf("no release found with tag: %s", tag)
-}
-
 func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *github.RepositoryRelease) error {
 	ctx := context.Background()
 
@@ -97,28 +90,17 @@ func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *gi
 	return err
 }
 
-// Not really necessary
-func (releaser GithubReleaser) loadReleases(r *Release) ([]*github.RepositoryRelease, error) {
-	ctx := context.Background()
-
-	// TODO: load all releases in separate go-routine because all releases are paginated
-	
-	releases, _, err := releaser.client.Repositories.ListReleases(
-		ctx,
-		r.RepoOwner,
-		r.RepoName,
-		&github.ListOptions{},
-	)
-
-	return releases, err
-}
-
 func (releaser GithubReleaser) getReleaseByTag(r *Release) (*github.RepositoryRelease, error) {
 	ctx := context.Background()
 
-	release, _, err := releaser.client.Repositories.GetReleaseByTag(ctx, r.RepoOwner, r.RepoName, r.Tag)
+	release, _, err := releaser.client.Repositories.GetReleaseByTag(
+		ctx,
+		r.RepoOwner,
+		r.RepoName,
+		r.Tag,
+	)
 
 	return release, err
 }
 
-// Release should be done in go routines
+// Release should be done in go-routines
