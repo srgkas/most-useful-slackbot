@@ -1,12 +1,12 @@
 package config
 
 type Config struct {
-	serviceList ServiceListConf
-	destination DestinationConf
-	slackToken SlackTokenConf
-	gitToken GitTokenConf
-	channels ChannelsConf
-	hfApproval HFApprovalConf
+	serviceList        ServiceListConf
+	destinationChannel DestinationChannelConf
+	slackToken         SlackTokenConf
+	gitToken           GitTokenConf
+	channels           ChannelsConf
+	hfApproval         HFApprovalConf
 }
 
 type HFApprovalConf struct {
@@ -14,10 +14,15 @@ type HFApprovalConf struct {
 }
 
 type ServiceListConf struct {
-	value []string
+	value map[string]ServiceConf
 }
 
-type DestinationConf struct {
+type ServiceConf struct {
+	Github string `json:"github"`
+	SearchPhrase string `json:"search-phrase"`
+}
+
+type DestinationChannelConf struct {
 	value string
 }
 
@@ -30,15 +35,15 @@ type GitTokenConf struct {
 }
 
 type ChannelsConf struct {
-	value []string
+	value map[string]string
 }
 
-func (c *Config) SetServiceList(values []string) {
+func (c *Config) SetServiceList(values map[string]ServiceConf) {
 	c.serviceList.value = values
 }
 
-func (c *Config) SetDestination(value string) {
-	c.destination.value = value
+func (c *Config) SetDestinationChannel(value string) {
+	c.destinationChannel.value = value
 }
 
 func (c *Config) SetSlackToken(value string)  {
@@ -49,7 +54,7 @@ func (c *Config) SetGitToken(value string)  {
 	c.gitToken.value = value
 }
 
-func (c *Config) SetChannels(values []string)  {
+func (c *Config) SetChannels(values map[string]string)  {
 	c.channels.value = values
 }
 
@@ -61,8 +66,8 @@ func (c *Config) GetServiceList() ServiceListConf {
 	return c.serviceList
 }
 
-func (c *Config) GetDestination() DestinationConf {
-	return c.destination
+func (c *Config) GetDestinationChannel() DestinationChannelConf {
+	return c.destinationChannel
 }
 
 func (c *Config) GetSlackToken() SlackTokenConf {
