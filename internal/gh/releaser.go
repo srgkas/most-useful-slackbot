@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-// Release DTO
-
 type Release struct {
 	RepoOwner string
 	RepoName string
@@ -34,13 +32,7 @@ type GithubReleaser struct {
 }
 
 func (releaser GithubReleaser) Release(r *Release) error {
-	releases, err := releaser.loadReleases(r)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	targetRelease, err := getReleaseByTag(releases, r.Tag)
+	targetRelease, err := releaser.getReleaseByTag(r)
 
 	if err != nil {
 		log.Fatal(err)
@@ -59,11 +51,7 @@ func (releaser GithubReleaser) Release(r *Release) error {
 	return nil
 }
 
-func CreateWithoutClient(token string ) Releaser {
-	return &GithubReleaser{client: nil}
-}
-
-func CreateReleaser(token string) Releaser {
+func NewReleaser(token string) Releaser {
 	// Context might be from outside. TBD
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
@@ -83,7 +71,7 @@ func repoToOwnerRepoName(repo string) (string, string) {
 	return parts[0], parts[1]
 }
 
-func getReleaseByTag(releases []*github.RepositoryRelease, tag string) (*github.RepositoryRelease, error) {
+func getReleaseByTagInMemory(releases []*github.RepositoryRelease, tag string) (*github.RepositoryRelease, error) {
 	for _, release := range releases {
 		if *release.TagName == tag {
 			return release, nil
@@ -109,6 +97,7 @@ func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *gi
 	return err
 }
 
+// Not really necessary
 func (releaser GithubReleaser) loadReleases(r *Release) ([]*github.RepositoryRelease, error) {
 	ctx := context.Background()
 
@@ -122,6 +111,14 @@ func (releaser GithubReleaser) loadReleases(r *Release) ([]*github.RepositoryRel
 	)
 
 	return releases, err
+}
+
+func (releaser GithubReleaser) getReleaseByTag(r *Release) (*github.RepositoryRelease, error) {
+	ctx := context.Background()
+
+	release, _, err := releaser.client.Repositories.GetReleaseByTag(ctx, r.RepoOwner, r.RepoName, r.Tag)
+
+	return release, err
 }
 
 // Release should be done in go routines
