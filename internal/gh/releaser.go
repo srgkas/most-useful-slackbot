@@ -34,15 +34,7 @@ type GithubReleaser struct {
 }
 
 func (releaser GithubReleaser) Release(r *Release) error {
-	ctx := context.Background()
-
-	// TODO: load all releases in separate go-routine because all releases are paginated
-	releases, _, err := releaser.client.Repositories.ListReleases(
-		ctx,
-		r.RepoOwner,
-		r.RepoName,
-		&github.ListOptions{},
-	)
+	releases, err := releaser.loadReleases(r)
 
 	if err != nil {
 		log.Fatal(err)
@@ -118,8 +110,18 @@ func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *gi
 }
 
 func (releaser GithubReleaser) loadReleases(r *Release) ([]*github.RepositoryRelease, error) {
-	//TODO: implement
-	return nil, nil
+	ctx := context.Background()
+
+	// TODO: load all releases in separate go-routine because all releases are paginated
+	
+	releases, _, err := releaser.client.Repositories.ListReleases(
+		ctx,
+		r.RepoOwner,
+		r.RepoName,
+		&github.ListOptions{},
+	)
+
+	return releases, err
 }
 
 // Release should be done in go routines
