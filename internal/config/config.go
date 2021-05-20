@@ -1,5 +1,13 @@
 package config
 
+import (
+	"encoding/json"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
 type Config struct {
 	serviceList        ServiceListConf
 	destinationChannel DestinationChannelConf
@@ -84,4 +92,30 @@ func (c *Config) GetChannels() ChannelsConf {
 
 func (c *Config) GetHFApprovalConf() HFApprovalConf {
 	return c.hfApproval
+}
+
+func CreateConfig() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	services := make(map[string]ServiceConf)
+	channels := make(map[string]string)
+	err = json.Unmarshal([]byte(os.Getenv("SERVICES")), &services)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal([]byte(os.Getenv("CHANNELS")), &channels)
+	if err != nil {
+		panic(err)
+	}
+
+	c := &Config{}
+	c.SetServiceList(services)
+	c.SetDestinationChannel(os.Getenv("DESTINATION_CHANNEL"))
+	c.SetChannels(channels)
+	c.SetSlackToken(os.Getenv("SLACK_TOKEN"))
+	c.SetGitToken(os.Getenv("GITHUB_TOKEN"))
+	return c
 }
