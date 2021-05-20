@@ -18,11 +18,11 @@ type Config struct {
 }
 
 type HFApprovalConf struct {
-	value string
+	Value string
 }
 
 type ServiceListConf struct {
-	value map[string]ServiceConf
+	Value map[string]ServiceConf
 }
 
 type ServiceConf struct {
@@ -31,43 +31,43 @@ type ServiceConf struct {
 }
 
 type DestinationChannelConf struct {
-	value string
+	Value string
 }
 
 type SlackTokenConf struct {
-	value string
+	Value string
 }
 
 type GitTokenConf struct {
-	value string
+	Value string
 }
 
 type ChannelsConf struct {
-	value map[string]string
+	Value map[string]string
 }
 
 func (c *Config) SetServiceList(values map[string]ServiceConf) {
-	c.serviceList.value = values
+	c.serviceList.Value = values
 }
 
 func (c *Config) SetDestinationChannel(value string) {
-	c.destinationChannel.value = value
+	c.destinationChannel.Value = value
 }
 
 func (c *Config) SetSlackToken(value string)  {
-	c.slackToken.value = value
+	c.slackToken.Value = value
 }
 
 func (c *Config) SetGitToken(value string)  {
-	c.gitToken.value = value
+	c.gitToken.Value = value
 }
 
 func (c *Config) SetChannels(values map[string]string)  {
-	c.channels.value = values
+	c.channels.Value = values
 }
 
 func (c *Config) SetHFApprovalConf(value string)  {
-	c.hfApproval.value = value
+	c.hfApproval.Value = value
 }
 
 func (c *Config) GetServiceList() ServiceListConf {

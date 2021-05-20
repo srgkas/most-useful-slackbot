@@ -3,17 +3,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/gorilla/mux"
+	"github.com/slack-go/slack"
+	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"io/ioutil"
 	"net/http"
 )
+
+var slackClient *slack.Client
 
 func main() {
 	cfg := config.CreateConfig()
 	fmt.Println(cfg)
 
 	r := mux.NewRouter()
+
+	initSlackClient()
 
 	r.HandleFunc("/events/handle", func (w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -38,5 +43,13 @@ func main() {
 		// event parsing goes here
 	})
 
-	http.ListenAndServe(":8000", r)
+	err := http.ListenAndServe(":8000", r)
+	if err != nil {
+		panic("Server can't start")
+	}
+}
+
+func initSlackClient() {
+	conf := config.CreateConfig().GetSlackToken()
+	slackClient = slack.New(conf.Value)
 }
