@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	slackgo "github.com/slack-go/slack"
-	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal"
 	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal/slack"
