@@ -2,4 +2,7 @@ module github.com/srgkas/most-useful-slackbot
 
 go 1.16
 
-require github.com/gorilla/mux v1.8.0 // indirect
+require (
+	github.com/gorilla/mux v1.8.0
+	github.com/stretchr/testify v1.7.0
+)
