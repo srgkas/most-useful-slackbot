@@ -9,20 +9,25 @@ import (
 	"strings"
 )
 
+// Repo DTO
+type Repo struct {
+	Owner string
+	Name string
+}
+
 // Release DTO
 type Release struct {
-	RepoOwner string
-	RepoName string
+	Repo *Repo
 	Tag string
 }
 
 // NewRelease create release DTO
 // repo: {owner}/{name} srgkas/most-useful-slackbot
 // tag: v0.0.1
-func NewRelease(repo string, tag string) *Release {
-	owner, repoName := repoToOwnerRepoName(repo)
+func NewRelease(repository string, tag string) *Release {
+	repo := repoFromString(repository)
 
-	return &Release{RepoOwner: owner, RepoName: repoName, Tag: tag}
+	return &Release{Repo: repo, Tag: tag}
 }
 
 // Releaser code
@@ -50,7 +55,7 @@ func (releaser GithubReleaser) Release(r *Release) error {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Released version: %s:/%s,%s\n", r.RepoOwner, r.RepoName, r.Tag)
+	fmt.Printf("Released version: %s:/%s,%s\n", r.Repo.Owner, r.Repo.Name, r.Tag)
 
 	return nil
 }
@@ -68,10 +73,13 @@ func NewReleaser(token string) Releaser {
 	return &GithubReleaser{client: client}
 }
 
-func repoToOwnerRepoName(repo string) (string, string) {
+func repoFromString(repo string) *Repo {
 	parts := strings.Split(repo, "/")
 
-	return parts[0], parts[1]
+	return &Repo{
+		Owner: parts[0],
+		Name:  parts[1],
+	}
 }
 
 func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *github.RepositoryRelease) error {
@@ -81,8 +89,8 @@ func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *gi
 
 	ghRelease, _, err := releaser.client.Repositories.EditRelease(
 		ctx,
-		release.RepoOwner,
-		release.RepoName,
+		release.Repo.Owner,
+		release.Repo.Name,
 		*ghRelease.ID,
 		ghRelease,
 	)
@@ -95,8 +103,8 @@ func (releaser GithubReleaser) getReleaseByTag(r *Release) (*github.RepositoryRe
 
 	release, _, err := releaser.client.Repositories.GetReleaseByTag(
 		ctx,
-		r.RepoOwner,
-		r.RepoName,
+		r.Repo.Owner,
+		r.Repo.Name,
 		r.Tag,
 	)
 
