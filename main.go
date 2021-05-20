@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	slackgo "github.com/slack-go/slack"
+	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal"
 	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal/slack"
@@ -28,11 +30,15 @@ var handlersMap = map[string][]internal.Handler {
 	},
 }
 
+var slackClient *slackgo.Client
+
 func main() {
 	cfg := config.CreateConfig()
 	fmt.Println(cfg)
 
 	r := mux.NewRouter()
+
+	initSlackClient()
 
 	r.HandleFunc("/events/handle", func (w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -71,7 +77,15 @@ func main() {
 		}
 	})
 
-	http.ListenAndServe(":8000", r)
+	err := http.ListenAndServe(":8000", r)
+	if err != nil {
+		panic("Server can't start")
+	}
+}
+
+func initSlackClient() {
+	conf := config.CreateConfig().GetSlackToken()
+	slackClient = slackgo.New(conf.Value)
 }
 
 func GetHandlers(e slack.Event) []internal.Handler {
