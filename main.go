@@ -4,13 +4,32 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/slack-go/slack"
+	slackgo "github.com/slack-go/slack"
 	"github.com/srgkas/most-useful-slackbot/internal/config"
+	"github.com/srgkas/most-useful-slackbot/internal"
+	"github.com/srgkas/most-useful-slackbot/internal/slack"
 	"io/ioutil"
 	"net/http"
 )
+var channels map[string]string
 
-var slackClient *slack.Client
+var handlersMap = map[string][]internal.Handler {
+	"as-hotfixes-approval": {
+		internal.Subscribe,
+	},
+	"as-deploy-prod": {
+		internal.Repost,
+		internal.ReplyInHotfixThread,
+	},
+	"as-deploy-prod-au": {
+		internal.ReplyInHotfixThread,
+	},
+	"as-deploy-hf": {
+		internal.ReplyInHotfixThread,
+	},
+}
+
+var slackClient *slackgo.Client
 
 func main() {
 	cfg := config.CreateConfig()
@@ -41,6 +60,17 @@ func main() {
 		}
 
 		// event parsing goes here
+		var e slack.Event
+
+		handlers := GetHandlers(e)
+
+		for _, h := range handlers {
+			go func (h internal.Handler) {
+				if err := h(e); err != nil {
+					fmt.Printf("Failed to process event by %v. Error: %v", h, err)
+				}
+			}(h)
+		}
 	})
 
 	err := http.ListenAndServe(":8000", r)
@@ -51,5 +81,16 @@ func main() {
 
 func initSlackClient() {
 	conf := config.CreateConfig().GetSlackToken()
-	slackClient = slack.New(conf.Value)
+	slackClient = slackgo.New(conf.Value)
+}
+
+func GetHandlers(e slack.Event) []internal.Handler {
+	if ch, ok := channels[e.GetChannel()]; ok {
+
+		if handlers, ok := handlersMap[ch]; ok {
+			return handlers
+		}
+	}
+
+	return []internal.Handler{}
 }
