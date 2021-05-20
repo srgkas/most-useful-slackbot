@@ -42,7 +42,19 @@ func (releaser GithubReleaser) Release(r *Release) error {
 		log.Fatal(err)
 	}
 
-	fmt.Println(releases)
+	targetRelease, err := getReleaseByTag(releases, r.Tag)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found target release: %s\n", *targetRelease.TagName)
+
+	err = releaser.uncheckPreRelease(r, targetRelease)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Printf("Released version: %s:%s\n", r.Repo, r.Tag)
 
@@ -83,13 +95,13 @@ func getReleaseByTag(releases []*github.RepositoryRelease, tag string) (*github.
 	return nil, fmt.Errorf("no release found with tag: %s", tag)
 }
 
-func uncheckPreRelease(client *github.Client, release *Release, ghRelease *github.RepositoryRelease) error {
+func (releaser GithubReleaser) uncheckPreRelease(release *Release, ghRelease *github.RepositoryRelease) error {
 	ctx := context.Background()
 
 	owner, repoName := repoToOwnerRepoName(release.Repo)
 	*ghRelease.Prerelease = false
 
-	ghRelease, _, err := client.Repositories.EditRelease(ctx, owner, repoName, *ghRelease.ID, ghRelease)
+	ghRelease, _, err := releaser.client.Repositories.EditRelease(ctx, owner, repoName, *ghRelease.ID, ghRelease)
 
 	return err
 }

@@ -7,7 +7,7 @@ import (
 
 func main() {
 	release := gh.NewRelease("srgkas/most-useful-slackbot", "v0.0.1")
-	releaser := gh.CreateReleaser("")
+	releaser := gh.CreateReleaser("supersecret")
 
 	err := releaser.Release(release)
 
