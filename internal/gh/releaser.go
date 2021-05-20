@@ -74,4 +74,12 @@ func repoToOwnerRepoName(repo string) (string, string) {
 	return parts[0], parts[1]
 }
 
+func getReleaseByTag(releases []*github.RepositoryRelease, tag string) (*github.RepositoryRelease, error) {
+	return nil, nil
+}
+
+func uncheckPreRelease(release *github.RepositoryRelease) error {
+	return nil
+}
+
 // Release should be done in go routines
