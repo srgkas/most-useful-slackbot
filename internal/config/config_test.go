@@ -9,13 +9,18 @@ func TestConfig(t *testing.T) {
 	config := Config{}
 	config.SetChannels(getChannelsData())
 	config.SetDestination(getDestination())
-	config.SetToken(getToken())
+	config.SetSlackToken(getSlackToken())
+	config.SetGitToken(getGitToken())
 	config.SetServiceList(getServiceListData())
+	config.SetHFApprovalConf(getHFApprovalData())
 
 	assert.Equal(t, config.GetDestination().value, getDestination())
 	assert.Equal(t, config.GetChannels().value, getChannelsData())
 	assert.Equal(t, config.GetServiceList().value, getServiceListData())
-	assert.Equal(t, config.GetToken().value, getToken())
+	assert.Equal(t, config.GetSlackToken().value, getSlackToken())
+	assert.Equal(t, config.GetGitToken().value, getGitToken())
+	assert.Equal(t, config.GetGitToken().value, getGitToken())
+	assert.Equal(t, config.GetHFApprovalConf().value, getHFApprovalData())
 }
 
 func getServiceListData() []string {
@@ -30,6 +35,14 @@ func getDestination() string {
 	return "test_destination"
 }
 
-func getToken() string {
+func getSlackToken() string {
 	return "test_token"
+}
+
+func getGitToken() string {
+	return "test_git_token"
+}
+
+func getHFApprovalData() string {
+	return "hf_channel"
 }

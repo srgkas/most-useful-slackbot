@@ -1,17 +1,36 @@
 package config
 
+import (
+	"encoding/json"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
 type Config struct {
-	serviceList ServiceListConf
-	destination DestinationConf
-	token SlackTokenConf
-	channels ChannelsConf
+	serviceList        ServiceListConf
+	destinationChannel DestinationChannelConf
+	slackToken         SlackTokenConf
+	gitToken           GitTokenConf
+	channels           ChannelsConf
+	hfApproval         HFApprovalConf
+}
+
+type HFApprovalConf struct {
+	value string
 }
 
 type ServiceListConf struct {
-	value []string
+	value map[string]ServiceConf
 }
 
-type DestinationConf struct {
+type ServiceConf struct {
+	Github string `json:"github"`
+	SearchPhrase string `json:"search-phrase"`
+}
+
+type DestinationChannelConf struct {
 	value string
 }
 
@@ -19,38 +38,84 @@ type SlackTokenConf struct {
 	value string
 }
 
-type ChannelsConf struct {
-	value []string
+type GitTokenConf struct {
+	value string
 }
 
-func (c *Config) SetServiceList(values []string) {
+type ChannelsConf struct {
+	value map[string]string
+}
+
+func (c *Config) SetServiceList(values map[string]ServiceConf) {
 	c.serviceList.value = values
 }
 
-func (c *Config) SetDestination(value string) {
-	c.destination.value = value
+func (c *Config) SetDestinationChannel(value string) {
+	c.destinationChannel.value = value
 }
 
-func (c *Config) SetToken(value string)  {
-	c.token.value = value
+func (c *Config) SetSlackToken(value string)  {
+	c.slackToken.value = value
 }
 
-func (c *Config) SetChannels(values []string)  {
+func (c *Config) SetGitToken(value string)  {
+	c.gitToken.value = value
+}
+
+func (c *Config) SetChannels(values map[string]string)  {
 	c.channels.value = values
+}
+
+func (c *Config) SetHFApprovalConf(value string)  {
+	c.hfApproval.value = value
 }
 
 func (c *Config) GetServiceList() ServiceListConf {
 	return c.serviceList
 }
 
-func (c *Config) GetDestination() DestinationConf {
-	return c.destination
+func (c *Config) GetDestinationChannel() DestinationChannelConf {
+	return c.destinationChannel
 }
 
-func (c *Config) GetToken() SlackTokenConf {
-	return c.token
+func (c *Config) GetSlackToken() SlackTokenConf {
+	return c.slackToken
+}
+
+func (c *Config) GetGitToken() GitTokenConf {
+	return c.gitToken
 }
 
 func (c *Config) GetChannels() ChannelsConf {
 	return c.channels
+}
+
+func (c *Config) GetHFApprovalConf() HFApprovalConf {
+	return c.hfApproval
+}
+
+func CreateConfig() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	services := make(map[string]ServiceConf)
+	channels := make(map[string]string)
+	err = json.Unmarshal([]byte(os.Getenv("SERVICES")), &services)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal([]byte(os.Getenv("CHANNELS")), &channels)
+	if err != nil {
+		panic(err)
+	}
+
+	c := &Config{}
+	c.SetServiceList(services)
+	c.SetDestinationChannel(os.Getenv("DESTINATION_CHANNEL"))
+	c.SetChannels(channels)
+	c.SetSlackToken(os.Getenv("SLACK_TOKEN"))
+	c.SetGitToken(os.Getenv("GITHUB_TOKEN"))
+	return c
 }

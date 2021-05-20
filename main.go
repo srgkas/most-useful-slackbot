@@ -4,12 +4,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/srgkas/most-useful-slackbot/internal"
+	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal/slack"
 	"io/ioutil"
 	"net/http"
 )
+var channels map[string]string
+
+var handlersMap = map[string][]internal.Handler {
+	"as-hotfixes-approval": {
+		internal.Subscribe,
+	},
+	"as-deploy-prod": {
+		internal.Repost,
+		internal.ReplyInHotfixThread,
+	},
+	"as-deploy-prod-au": {
+		internal.ReplyInHotfixThread,
+	},
+	"as-deploy-hf": {
+		internal.ReplyInHotfixThread,
+	},
+}
 
 func main() {
+	cfg := config.CreateConfig()
+	fmt.Println(cfg)
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/events/handle", func (w http.ResponseWriter, r *http.Request) {
@@ -33,23 +55,32 @@ func main() {
 		}
 
 		// event parsing goes here
+		var payload slack.Payload
+		json.Unmarshal(all, &payload)
+		fmt.Println("Parsed structure:")
+		fmt.Printf("%+v\n", payload)
+
+		handlers := GetHandlers(payload.Event)
+
+		for _, h := range handlers {
+			go func (h internal.Handler) {
+				if err := h(payload.Event); err != nil {
+					fmt.Printf("Failed to process event by %v. Error: %v", h, err)
+				}
+			}(h)
+		}
 	})
 
-	r.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Println("New request from slack message")
-		b, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			panic(err)
+	http.ListenAndServe(":8000", r)
+}
+
+func GetHandlers(e slack.Event) []internal.Handler {
+	if ch, ok := channels[e.GetChannel()]; ok {
+
+		if handlers, ok := handlersMap[ch]; ok {
+			return handlers
 		}
-		var t slack.Payload
-		json.Unmarshal(b, &t)
+	}
 
-		fmt.Println("Original json:")
-		fmt.Println(string(b))
-
-		fmt.Println("Parsed structure:")
-		fmt.Printf("%+v\n", t)
-	}).Methods("POST")
-
-	http.ListenAndServe(":8080", r)
+	return []internal.Handler{}
 }
