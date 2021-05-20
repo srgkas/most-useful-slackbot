@@ -35,8 +35,7 @@ func (releaser GithubReleaser) Release(r *Release) error {
 
 	owner, repoName := repoToOwnerRepoName(r.Repo)
 
-
-	// Test API
+	// TODO: load all releases in separate go-routine because all releases are paginated
 	releases, _, err := releaser.client.Repositories.ListReleases(ctx, owner, repoName, &github.ListOptions{})
 
 	if err != nil {
@@ -75,11 +74,24 @@ func repoToOwnerRepoName(repo string) (string, string) {
 }
 
 func getReleaseByTag(releases []*github.RepositoryRelease, tag string) (*github.RepositoryRelease, error) {
-	return nil, nil
+	for _, release := range releases {
+		if *release.TagName == tag {
+			return release, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no release found with tag: %s", tag)
 }
 
-func uncheckPreRelease(release *github.RepositoryRelease) error {
-	return nil
+func uncheckPreRelease(client *github.Client, release *Release, ghRelease *github.RepositoryRelease) error {
+	ctx := context.Background()
+
+	owner, repoName := repoToOwnerRepoName(release.Repo)
+	*ghRelease.Prerelease = false
+
+	ghRelease, _, err := client.Repositories.EditRelease(ctx, owner, repoName, *ghRelease.ID, ghRelease)
+
+	return err
 }
 
 // Release should be done in go routines
