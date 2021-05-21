@@ -1,6 +1,11 @@
 package internal
 
-import "github.com/srgkas/most-useful-slackbot/internal/slack"
+import (
+	"github.com/srgkas/most-useful-slackbot/internal/config"
+	"github.com/srgkas/most-useful-slackbot/internal/gh"
+	"github.com/srgkas/most-useful-slackbot/internal/slack"
+	"github.com/srgkas/most-useful-slackbot/internal/teamcity"
+)
 
 type Handler func (event slack.Event) error
 
@@ -19,8 +24,22 @@ func ReplyInHotfixThread(event slack.Event) error {
 	return nil
 }
 
-func ReleaseTag(event slack.Event) error {
-	// String example to parse
-	// Succeeded - AirSlate / PROD Env / PROD: Builds / Backend: API / api-addons / Deploy #173 | - v8.11.1 [v8.11.1]>
-	return nil
+func ReleaseTag(releaser gh.Releaser, cfg *config.Config) Handler {
+	return func(event slack.Event) error {
+		buildInfo, err := teamcity.ParseBuildInfo(event.Text)
+
+		if err != nil {
+			return err
+		}
+
+		repo, err := buildInfo.GetProjectRepo()
+
+		if err != nil {
+			return err
+		}
+
+		release := gh.NewRelease(repo, buildInfo.Tag)
+
+		return releaser.Release(release)
+	}
 }

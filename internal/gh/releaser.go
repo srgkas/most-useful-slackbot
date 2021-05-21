@@ -55,7 +55,7 @@ func (releaser GithubReleaser) Release(r *Release) error {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Released version: %s:/%s,%s\n", r.Repo.Owner, r.Repo.Name, r.Tag)
+	fmt.Printf("Released version: %s/%s:%s\n", r.Repo.Owner, r.Repo.Name, r.Tag)
 
 	return nil
 }
