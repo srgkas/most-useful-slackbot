@@ -81,7 +81,10 @@ func initHandlers() {
 			internal.Subscribe,
 		},
 		"as-deploy-prod": {
-			internal.Repost(cfg.GetDestinationChannel().Value, slackClient),
+			internal.ContainsServiceNameDecorator(
+				cfg.GetServiceList().Value,
+				internal.Repost(cfg.GetDestinationChannel().Value, slackClient),
+			),
 			internal.ReplyInHotfixThread,
 			internal.ReleaseTag(githubReleaser, cfg),
 		},

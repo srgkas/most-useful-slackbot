@@ -7,6 +7,7 @@ import (
 	"github.com/srgkas/most-useful-slackbot/internal/gh"
 	"github.com/srgkas/most-useful-slackbot/internal/slack"
 	"github.com/srgkas/most-useful-slackbot/internal/teamcity"
+	"strings"
 )
 
 type Handler func (event slack.Event) error
@@ -23,6 +24,24 @@ func Repost(channel string, client *slackgo.Client) Handler {
 		return err
 	}
 }
+
+func ContainsServiceNameDecorator(services map[string]config.ServiceConf, handler Handler) Handler {
+	return func(event slack.Event) error {
+		messageContainsService := false
+		for serviceName := range services {
+			if strings.Contains(event.Text, "api-" + serviceName) {
+				messageContainsService = true
+				break
+			}
+		}
+		if messageContainsService {
+			return handler(event)
+		}
+
+		return nil
+	}
+}
+
 
 func Subscribe(event slack.Event) error {
 	// subscribe logic
@@ -55,15 +74,24 @@ func ReleaseTag(releaser gh.Releaser, cfg *config.Config) Handler {
 }
 
 func getChannelId(channelName string, client *slackgo.Client) (string, error) {
-	options := slackgo.GetConversationsParameters{}
-	groups, _, err1 := client.GetConversations(&options)
-	if err1 != nil {
-		panic(err1)
-	}
+	cursor := ""
+	for loadNextPage := true; loadNextPage; {
+		options := slackgo.GetConversationsParameters{Cursor: cursor}
+		groups, internalCursor, err := client.GetConversations(&options)
 
-	for _, element := range groups {
-		if element.Name == channelName {
-			return element.ID, nil
+		if err != nil {
+			panic(err)
+		}
+
+		for _, element := range groups {
+			if element.Name == channelName {
+				return element.ID, nil
+			}
+		}
+
+		if internalCursor == "" {
+			cursor = internalCursor
+			loadNextPage = false
 		}
 	}
 
