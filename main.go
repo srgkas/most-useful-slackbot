@@ -78,16 +78,16 @@ func initHandlers() {
 		"as-hotfixes-approval": {
 			internal.Subscribe,
 		},
-		"as-deploy-prod": {
+		internal.DEPLOY_PROD: {
 			internal.Repost,
-			internal.ReplyInHotfixThread,
+			//internal.ReplyInHotfixThread,
 			internal.ReleaseTag(githubReleaser, cfg),
 		},
-		"as-deploy-prod-au": {
-			internal.ReplyInHotfixThread,
+		internal.DEPLOY_PROD_AU: {
+			//internal.ReplyInHotfixThread,
 		},
-		"as-deploy-hf": {
-			internal.ReplyInHotfixThread,
+		internal.DEPLOY_HF: {
+			//internal.ReplyInHotfixThread,
 		},
 		"silly-willy-test": {
 			internal.ReleaseTag(githubReleaser, cfg),
