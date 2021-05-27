@@ -1,0 +1,18 @@
+*Title:* Fixed bug with bots
+*Description:* Fairy tail on what has been done in this fix
+*Service(s):*
+• api-addons
+• prefill-from-source-bots
+*Task(s):*
+• <https://link-to-jira-1>
+• <https://link-to-jira-2>
+*Diff(s):*
+• <https://link-to-diff-1>
+• <https://link-to-diff-1>
+*Tag(s):*
+• <https://link-to-tag-1>
+• <https://link-to-tag-1>
+*QA(s):*
+    <@U0238FP7V16> <@U02240T3RTP>
+*Approvers:*
+    cc <@U022QS73T8C>

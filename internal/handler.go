@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	slackgo "github.com/slack-go/slack"
 	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal/gh"
@@ -71,6 +72,20 @@ func ReleaseTag(releaser gh.Releaser, cfg *config.Config) Handler {
 
 		return releaser.Release(release)
 	}
+}
+
+func ParseHotfixMessageExample(event slack.Event) error {
+	r, e := slack.ParseHotfixMessage(event.Text)
+
+	if e != nil {
+		return e
+	}
+
+	for _, fix := range r.GetFixes() {
+		fmt.Printf("Got fix for: %s:%s\n", fix.Project, fix.Tag)
+	}
+
+	return nil
 }
 
 func getChannelId(channelName string, client *slackgo.Client) (string, error) {

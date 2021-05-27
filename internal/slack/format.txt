@@ -9,7 +9,7 @@ Task(s):
 Diff(s):
 * https://link-to-diff-1
 * https://link-to-diff-1
-Tags(s):
+Tag(s):
 * https://link-to-tag-1
 * https://link-to-tag-1
 QA(s):

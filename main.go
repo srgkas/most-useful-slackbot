@@ -94,6 +94,7 @@ func initHandlers() {
 		},
 		"silly-willy-test": {
 			internal.ReleaseTag(githubReleaser, cfg),
+			internal.ParseHotfixMessageExample,
 		},
 	}
 }
