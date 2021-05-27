@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	slackgo "github.com/slack-go/slack"
 	"github.com/srgkas/most-useful-slackbot/internal"
@@ -18,6 +19,7 @@ var handlersMap map[string][]internal.Handler
 
 var slackClient *slackgo.Client
 var githubReleaser gh.Releaser
+var r *redis.Client
 var cfg *config.Config
 
 func main() {
@@ -28,6 +30,7 @@ func main() {
 	initSlackClient()
 	initGithubReleaser()
 	initHandlers()
+	initRedis()
 
 	r.HandleFunc("/events/handle", func (w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -102,6 +105,16 @@ func initSlackClient() {
 func initGithubReleaser() {
 	conf := cfg.GetGitToken()
 	githubReleaser = gh.NewReleaser(conf.Value)
+}
+
+func initRedis() {
+	conf := cfg.GetRedisConf()
+
+	r = redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", conf.Host, conf.Port),
+		Password: conf.Password,
+		DB: conf.DbNumber,
+	})
 }
 
 func GetHandlers(e slack.Event) []internal.Handler {
