@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"errors"
+	slackgo "github.com/slack-go/slack"
 	"github.com/srgkas/most-useful-slackbot/internal/config"
 	"github.com/srgkas/most-useful-slackbot/internal/gh"
 	"github.com/srgkas/most-useful-slackbot/internal/slack"
@@ -9,9 +11,17 @@ import (
 
 type Handler func (event slack.Event) error
 
-func Repost(event slack.Event) error {
-	// repost logic
-	return nil
+func Repost(channel string, client *slackgo.Client) Handler {
+	return func(event slack.Event) error {
+		channelID, err := getChannelId(channel, client)
+		if err != nil {
+			panic(err)
+		}
+
+		messageOptions := slackgo.MsgOptionText(event.Text, false)
+		_, _, err = client.PostMessage(channelID, messageOptions)
+		return err
+	}
 }
 
 func Subscribe(event slack.Event) error {
@@ -42,4 +52,20 @@ func ReleaseTag(releaser gh.Releaser, cfg *config.Config) Handler {
 
 		return releaser.Release(release)
 	}
+}
+
+func getChannelId(channelName string, client *slackgo.Client) (string, error) {
+	options := slackgo.GetConversationsParameters{}
+	groups, _, err1 := client.GetConversations(&options)
+	if err1 != nil {
+		panic(err1)
+	}
+
+	for _, element := range groups {
+		if element.Name == channelName {
+			return element.ID, nil
+		}
+	}
+
+	return "", errors.New("could not find channel with name")
 }

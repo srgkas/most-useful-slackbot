@@ -22,7 +22,6 @@ var cfg *config.Config
 
 func main() {
 	cfg = config.CreateConfig()
-	fmt.Println(cfg)
 
 	r := mux.NewRouter()
 
@@ -79,7 +78,7 @@ func initHandlers() {
 			internal.Subscribe,
 		},
 		"as-deploy-prod": {
-			internal.Repost,
+			internal.Repost(cfg.GetDestinationChannel().Value, slackClient),
 			internal.ReplyInHotfixThread,
 			internal.ReleaseTag(githubReleaser, cfg),
 		},
