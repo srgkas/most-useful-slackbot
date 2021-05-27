@@ -2,12 +2,15 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/joho/godotenv"
 )
+
+var cfg *Config
 
 type Config struct {
 	serviceList        ServiceListConf
@@ -55,37 +58,37 @@ type RedisConfig struct {
 	DbNumber int
 }
 
-func (c *Config) SetServiceList(values map[string]ServiceConf) {
+func (c *Config) setServiceList(values map[string]ServiceConf) {
 	c.serviceList.Value = values
 }
 
-func (c *Config) SetDestinationChannel(value string) {
+func (c *Config) setDestinationChannel(value string) {
 	c.destinationChannel.Value = value
 }
 
-func (c *Config) SetSlackToken(value string) {
+func (c *Config) setSlackToken(value string) {
 	c.slackToken.Value = value
 }
 
-func (c *Config) SetGitToken(value string) {
+func (c *Config) setGitToken(value string) {
 	c.gitToken.Value = value
 }
 
-func (c *Config) SetChannels(values map[string]string) {
+func (c *Config) setChannels(values map[string]string) {
 	c.channels.Value = values
 }
 
-func (c *Config) SetHFApprovalConf(value string) {
+func (c *Config) setHFApprovalConf(value string) {
 	c.hfApproval.Value = value
 }
 
-func (c *Config) SetRedisConf(host, port, password string, db int) {
+func (c *Config) setRedisConf(host, port, password string, db int) {
 	c.redis.Host = host
 	c.redis.Port = port
 }
 
-func (c *Config) GetServiceList() ServiceListConf {
-	return c.serviceList
+func (c *Config) GetServiceList() *ServiceListConf {
+	return &c.serviceList
 }
 
 func (c *Config) GetDestinationChannel() DestinationChannelConf {
@@ -112,7 +115,7 @@ func (c *Config) GetRedisConf() RedisConfig {
 	return c.redis
 }
 
-func CreateConfig() *Config {
+func InitConfig() *Config {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -130,19 +133,25 @@ func CreateConfig() *Config {
 	}
 
 	c := &Config{}
-	c.SetServiceList(services)
-	c.SetDestinationChannel(os.Getenv("DESTINATION_CHANNEL"))
-	c.SetChannels(channels)
-	c.SetSlackToken(os.Getenv("SLACK_TOKEN"))
-	c.SetGitToken(os.Getenv("GITHUB_TOKEN"))
+	c.setServiceList(services)
+	c.setDestinationChannel(os.Getenv("DESTINATION_CHANNEL"))
+	c.setChannels(channels)
+	c.setSlackToken(os.Getenv("SLACK_TOKEN"))
+	c.setGitToken(os.Getenv("GITHUB_TOKEN"))
 	redisDb, _ := strconv.Atoi((os.Getenv("REDIS_DB")))
 
-	c.SetRedisConf(
+	c.setRedisConf(
 		os.Getenv("REDIS_HOST"),
 		os.Getenv("REDIS_PORT"),
 		os.Getenv("REDIS_PASSWORD"),
 		redisDb,
 	)
 
+	fmt.Println(c)
+
 	return c
+}
+
+func GetConfig() *Config {
+	return cfg
 }

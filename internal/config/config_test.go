@@ -7,28 +7,36 @@ import (
 
 func TestConfig(t *testing.T) {
 	config := Config{}
-	config.SetChannels(getChannelsData())
-	config.SetDestination(getDestination())
-	config.SetSlackToken(getSlackToken())
-	config.SetGitToken(getGitToken())
-	config.SetServiceList(getServiceListData())
-	config.SetHFApprovalConf(getHFApprovalData())
+	config.setChannels(getChannelsData())
+	config.setDestinationChannel(getDestination())
+	config.setSlackToken(getSlackToken())
+	config.setGitToken(getGitToken())
+	config.setServiceList(getServiceListData())
+	config.setHFApprovalConf(getHFApprovalData())
 
-	assert.Equal(t, config.GetDestination().value, getDestination())
-	assert.Equal(t, config.GetChannels().value, getChannelsData())
-	assert.Equal(t, config.GetServiceList().value, getServiceListData())
-	assert.Equal(t, config.GetSlackToken().value, getSlackToken())
-	assert.Equal(t, config.GetGitToken().value, getGitToken())
-	assert.Equal(t, config.GetGitToken().value, getGitToken())
-	assert.Equal(t, config.GetHFApprovalConf().value, getHFApprovalData())
+	assert.Equal(t, config.GetDestinationChannel().Value, getDestination())
+	assert.Equal(t, config.GetChannels().Value, getChannelsData())
+	assert.Equal(t, config.GetServiceList().Value, getServiceListData())
+	assert.Equal(t, config.GetSlackToken().Value, getSlackToken())
+	assert.Equal(t, config.GetGitToken().Value, getGitToken())
+	assert.Equal(t, config.GetGitToken().Value, getGitToken())
+	assert.Equal(t, config.GetHFApprovalConf().Value, getHFApprovalData())
 }
 
-func getServiceListData() []string {
-	return []string{"first_service", "second_service", "third_service"}
+func getServiceListData() map[string]ServiceConf {
+	return map[string]ServiceConf{
+		"first_service": {Github: "first", SearchPhrase: "1st"},
+		"second_service": {Github: "second", SearchPhrase: "2nd"},
+		"third_service": {Github: "third", SearchPhrase: "3rd"},
+	}
 }
 
-func getChannelsData() []string {
-	return []string{"first_channels", "second_channels", "third_channels"}
+func getChannelsData() map[string]string {
+	return map[string]string{
+		"first_channels": "first",
+		"second_channels": "second",
+		"third_channels": "third",
+	}
 }
 
 func getDestination() string {
