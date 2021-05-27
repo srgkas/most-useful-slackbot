@@ -3,6 +3,7 @@ module github.com/srgkas/most-useful-slackbot
 go 1.16
 
 require (
+	github.com/go-redis/redis/v8 v8.9.0
 	github.com/google/go-github/v35 v35.2.0
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
