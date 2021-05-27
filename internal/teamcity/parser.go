@@ -32,6 +32,7 @@ func (info *BuildInfo) GetProjectRepo() (string, error) {
 func ParseBuildInfo(message string) (*BuildInfo, error) {
 	// String example to parse
 	// Succeeded - AirSlate / PROD Env / PROD: Builds / Backend: API / most-useful-slackbot / Deploy #173 | - v0.0.1 [v0.0.1]>
+	fmt.Println(message)
 	parts := strings.Split(message, "|")
 
 	if len(parts) < 2 {
