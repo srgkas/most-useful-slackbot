@@ -43,10 +43,37 @@ func ContainsServiceNameDecorator(services map[string]config.ServiceConf, handle
 	}
 }
 
+func Subscribe(repo slack.SubscriptionRepo) Handler {
+	return func(event slack.Event) error {
+		r, e := slack.ParseHotfixMessage(event.Text)
 
-func Subscribe(event slack.Event) error {
-	// subscribe logic
-	return nil
+		if e != nil {
+			return e
+		}
+
+		for _, fix := range r.GetFixes() {
+			fmt.Printf("Parsed fix for: %s:%s\n", fix.Project, fix.Tag)
+
+			subscription := slack.NewSubscription(
+				fix.Project,
+				fix.Tag,
+				event.GetTimestamp(),
+			)
+
+			err := repo.Store(subscription)
+
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Created subscription for: %s and thread_ts:%s\n",
+				subscription.GetSubscriptionKey().String(),
+				subscription.GetMessageID(),
+			)
+		}
+
+		return nil
+	}
 }
 
 func ReplyInHotfixThread(event slack.Event) error {
@@ -72,20 +99,6 @@ func ReleaseTag(releaser gh.Releaser, cfg *config.Config) Handler {
 
 		return releaser.Release(release)
 	}
-}
-
-func ParseHotfixMessageExample(event slack.Event) error {
-	r, e := slack.ParseHotfixMessage(event.Text)
-
-	if e != nil {
-		return e
-	}
-
-	for _, fix := range r.GetFixes() {
-		fmt.Printf("Got fix for: %s:%s\n", fix.Project, fix.Tag)
-	}
-
-	return nil
 }
 
 func getChannelId(channelName string, client *slackgo.Client) (string, error) {

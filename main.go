@@ -19,16 +19,17 @@ var handlersMap map[string][]internal.Handler
 var slackClient *slackgo.Client
 var githubReleaser gh.Releaser
 var cfg *config.Config
+var subscriptionsRepo slack.SubscriptionRepo
 
 func main() {
 	cfg = config.InitConfig()
-
 	r := mux.NewRouter()
 
+	internal.InitStorage(cfg)
 	initSlackClient()
 	initGithubReleaser()
+	initSubscriptions()
 	initHandlers()
-	internal.InitStorage()
 
 	r.HandleFunc("/events/handle", func (w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -76,7 +77,7 @@ func main() {
 func initHandlers() {
 	handlersMap = map[string][]internal.Handler{
 		"as-hotfixes-approval": {
-			internal.Subscribe,
+			internal.Subscribe(subscriptionsRepo),
 		},
 		"as-deploy-prod": {
 			internal.ContainsServiceNameDecorator(
@@ -93,8 +94,9 @@ func initHandlers() {
 			internal.ReplyInHotfixThread,
 		},
 		"silly-willy-test": {
-			internal.ReleaseTag(githubReleaser, cfg),
-			internal.ParseHotfixMessageExample,
+			//internal.ReleaseTag(githubReleaser, cfg),
+			//internal.ParseHotfixMessageExample,
+			//internal.Subscribe(subscriptionsRepo),
 		},
 	}
 }
@@ -107,6 +109,11 @@ func initSlackClient() {
 func initGithubReleaser() {
 	conf := cfg.GetGitToken()
 	githubReleaser = gh.NewReleaser(conf.Value)
+}
+
+func initSubscriptions() {
+	redis := internal.GetRedisClient()
+	subscriptionsRepo = slack.NewSubscriptionRepo(redis)
 }
 
 func GetHandlers(e slack.Event) []internal.Handler {

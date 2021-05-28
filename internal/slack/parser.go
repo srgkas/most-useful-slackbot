@@ -60,7 +60,6 @@ func extractHotFixes(message string) ([]*Hotfix, error) {
 	var inTags bool
 
 	for _, part := range parts {
-		fmt.Printf("%s\n", part)
 		if part == startTagsDelimiter && !inTags {
 			inTags = true
 			continue
@@ -115,7 +114,7 @@ func linkToHotfix(link string) (*Hotfix, error) {
 
 	domainProjectParts := strings.Split(
 		link,
-		"https://github.com/",
+	"https://github.com/",
 	)
 
 	if len(domainProjectParts) != 2 {
