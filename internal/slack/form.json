@@ -1,0 +1,138 @@
+{
+  "type": "modal",
+  "title": {
+    "type": "plain_text",
+    "text": "New hotfix announcement",
+    "emoji": true
+  },
+  "submit": {
+    "type": "plain_text",
+    "text": "Submit",
+    "emoji": true
+  },
+  "close": {
+    "type": "plain_text",
+    "text": "Cancel",
+    "emoji": true
+  },
+  "blocks": [
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "plain_text_input-action",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Short issue description"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Title",
+        "emoji": true
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "multiline": true,
+        "action_id": "plain_text_input-action",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "What caused the issue and how it has been fixed?"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Description",
+        "emoji": true
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "multiline": true,
+        "action_id": "plain_text_input-action",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Affected services (one per line)"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Service(s)",
+        "emoji": true
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "multiline": true,
+        "action_id": "plain_text_input-action",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Links to JIRA tasks (one per line)"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Task(s)",
+        "emoji": true
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "multiline": true,
+        "action_id": "plain_text_input-action",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Links to Github diffs (one per line)"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Diff(s)",
+        "emoji": true
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "multi_users_select",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select QAs",
+          "emoji": true
+        },
+        "action_id": "multi_users_select-action"
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "QA(s)",
+        "emoji": true
+      }
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "multi_users_select",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select approvers",
+          "emoji": true
+        },
+        "action_id": "multi_users_select-action"
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Approvers",
+        "emoji": true
+      }
+    }
+  ]
+}
