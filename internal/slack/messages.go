@@ -84,13 +84,19 @@ func CreateHotfixFormRequestMessage() slackgo.ModalViewRequest {
 func CreateHotfixFormResponseMessage(s *HotfixSubmission) slackgo.Message {
 	var blocks []slackgo.Block
 
-	block := slackgo.NewTextBlockObject(
-		slackgo.PlainTextType,
-		s.Title,
-		false,
-		false,
+	//TODO: Concat other parts
+	text := "*Title:* " + s.Title + "\n"
+
+	block := slackgo.NewSectionBlock(
+		slackgo.NewTextBlockObject(
+			slackgo.MarkdownType,
+			text,
+			false,
+			false,
+		),
+		nil,
+		nil,
 	)
-	//TODO: extends blocks with more sections
 
 	blocks = append(blocks, block)
 

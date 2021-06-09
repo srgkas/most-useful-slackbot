@@ -35,11 +35,11 @@ func HandleHotfixSubmission(client *slackgo.Client) SubmissionHandler {
 		// Best interface ever. Why not value?
 		channelID := submission.View.State.Values["conv_block"]["conv_input"].SelectedConversation
 
-		//hfSubmission := &HotfixSubmission{
-		//	Title: title,
-		//}
+		hfSubmission := &HotfixSubmission{
+			Title: title,
+		}
 
-		//message := CreateHotfixFormResponseMessage(hfSubmission)
+		message := CreateHotfixFormResponseMessage(hfSubmission)
 
 		//TODO: Test with response_url
 
@@ -47,8 +47,7 @@ func HandleHotfixSubmission(client *slackgo.Client) SubmissionHandler {
 		//TODO: Why invalid_block soooooqa
 		a, b, c, err := client.SendMessage(
 			channelID,
-			//slackgo.MsgOptionBlocks(message.Blocks.BlockSet[0]),
-			slackgo.MsgOptionText(title, false),
+			slackgo.MsgOptionBlocks(message.Blocks.BlockSet...),
 		)
 
 		if err != nil {
