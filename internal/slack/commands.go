@@ -1,14 +1,25 @@
 package slack
 
-import slackgo "github.com/slack-go/slack"
+import (
+	"fmt"
+	slackgo "github.com/slack-go/slack"
+)
 
 const HotfixCommand string = "/hotfix"
 
-func HotfixCommandHandler (client *slackgo.Client, cmd *slackgo.SlashCommand) error {
-	// Post form for hotfix
-	// CreateHotfixFormRequestMessage
-	// Show modal
-	return nil
-}
+type SlashCommandHandler func (cmd *slackgo.SlashCommand) error
 
-// Holds handlers to commands
+func HotfixCommandHandler (client *slackgo.Client) SlashCommandHandler {
+	return func(cmd *slackgo.SlashCommand) error {
+		hotfixModal := CreateHotfixFormRequestMessage()
+		response, err := client.OpenView(cmd.TriggerID, hotfixModal)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%+v\n", response)
+
+		return nil
+	}
+}

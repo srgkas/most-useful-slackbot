@@ -15,6 +15,8 @@ import (
 var channels = make(map[string]string)
 
 var handlersMap map[string][]internal.Handler
+var slashCommandHandlers map[string][]slack.SlashCommandHandler
+var submissionsHandlers map[string][]slack.SubmissionHandler
 
 var slackClient *slackgo.Client
 var githubReleaser gh.Releaser
@@ -70,10 +72,6 @@ func main() {
 
 	// Handle user form submission
 	r.HandleFunc("/interact", func (w http.ResponseWriter, r *http.Request) {
-		// Interactivity & Shortcuts section to specify url
-		// https://api.slack.com/interactivity/handling#setup
-		// view_submission
-		// See this https://github.com/slack-go/slack/blob/master/examples/modal/modal.go
 		var inter slackgo.InteractionCallback
 		err := json.Unmarshal([]byte(r.FormValue("payload")), &inter)
 		if err != nil {
@@ -82,10 +80,23 @@ func main() {
 			return
 		}
 
-		// After submission is received handler should be called in go-routine
+		fmt.Printf("%+v\n", inter.View)
 
-		// values are in map by action-id from form
-		fmt.Printf("%+v\n", inter.View.State.Values)
+		handlerID := inter.View.ExternalID
+		handlers, hasHandlers := submissionsHandlers[handlerID]
+		if !hasHandlers {
+			fmt.Printf("Invalid submission %s received. No handlers found.", handlerID)
+			w.WriteHeader(400)
+			return
+		}
+
+		for _, h := range handlers {
+			go func (h slack.SubmissionHandler, submission *slackgo.InteractionCallback) {
+				if err := h(submission); err != nil {
+					fmt.Printf("Failed to process submission by %v. Error: %v", h, err)
+				}
+			}(h, &inter)
+		}
 
 		w.WriteHeader(200)
 		return
@@ -93,8 +104,6 @@ func main() {
 
 	// Handle slash commands
 	r.HandleFunc("/commands/hotfix", func (w http.ResponseWriter, r *http.Request) {
-		//TODO: Hotfix form handler
-		// Create form and publish in hotfix channel
 		cmd, err := slackgo.SlashCommandParse(r)
 
 		if err != nil {
@@ -103,71 +112,20 @@ func main() {
 			return
 		}
 
-		// After slash command is received handler should be called in go-routine
-
-		fmt.Printf("%+v\n", cmd)
-
-		// Naive check or further single mux endpoint
-		if cmd.Command != "/hotfix" {
-			fmt.Printf("Invalid slash command. Expected /hotfix. Received: %s", cmd.Command)
+		handlers, hasHandlers := slashCommandHandlers[cmd.Command]
+		if !hasHandlers {
+			fmt.Printf("Invalid slash command %s received. No handlers found.", cmd.Command)
 			w.WriteHeader(400)
 			return
 		}
 
-		// Move all the bullshittery in separate files for messages
-		// This should be composed from json. Probably
-		var blocksList []slackgo.Block
-
-		blk := slackgo.NewInputBlock(
-			"my-block",
-			slackgo.NewTextBlockObject(
-				slackgo.PlainTextType,
-				"Test title",
-				false,
-				false,
-			),
-			slackgo.NewPlainTextInputBlockElement(
-				slackgo.NewTextBlockObject(
-					slackgo.PlainTextType,
-					"Placeholder",
-					false,
-					false,
-				),
-				"plain_text_input-action",
-			),
-		)
-
-		blocksList = append(blocksList, blk)
-
-		modalRequest := slackgo.ModalViewRequest{}
-		modalRequest.Type = slackgo.VTModal
-		modalRequest.Blocks = slackgo.Blocks{BlockSet: blocksList}
-		// Fuck this verbatim shit!!!!
-		modalRequest.Title = slackgo.NewTextBlockObject(
-			slackgo.PlainTextType,
-			"Test title",
-			false,
-			false,
-		)
-		modalRequest.Submit = slackgo.NewTextBlockObject(
-			slackgo.PlainTextType,
-			"Submit",
-			false,
-			false,
-		)
-		modalRequest.Close = slackgo.NewTextBlockObject(
-			slackgo.PlainTextType,
-			"Cancel",
-			false,
-			false,
-		)
-
-		response, _ := slackClient.OpenView(cmd.TriggerID, modalRequest)
-
-
-		fmt.Printf("%+v\n", response)
-
-		w.WriteHeader(200)
+		for _, h := range handlers {
+			go func (h slack.SlashCommandHandler, cmd *slackgo.SlashCommand) {
+				if err := h(cmd); err != nil {
+					fmt.Printf("Failed to process slash command by %v. Error: %v", h, err)
+				}
+			}(h, &cmd)
+		}
 	})
 
 	err := http.ListenAndServe(":8000", r)
@@ -199,6 +157,18 @@ func initHandlers() {
 			//internal.ReleaseTag(githubReleaser, cfg),
 			//internal.ParseHotfixMessageExample,
 			//internal.Subscribe(subscriptionsRepo),
+		},
+	}
+
+	slashCommandHandlers = map[string][]slack.SlashCommandHandler{
+		slack.HotfixCommand: {
+			slack.HotfixCommandHandler(slackClient),
+		},
+	}
+
+	submissionsHandlers = map[string][]slack.SubmissionHandler{
+		slack.HotfixSubmissionModal: {
+			slack.HandleHotfixSubmission(slackClient),
 		},
 	}
 }
