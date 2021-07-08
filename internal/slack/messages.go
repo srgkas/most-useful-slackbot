@@ -207,15 +207,18 @@ func CreateHotfixFormRequestMessage() slackgo.ModalViewRequest {
 		converSelect,
 	)
 
-	blocksList = append(blocksList, titleBlk)
-	blocksList = append(blocksList, descriptionBlk)
-	blocksList = append(blocksList, servicesBlk)
-	blocksList = append(blocksList, tasksBlk)
-	blocksList = append(blocksList, diffsBlk)
-	blocksList = append(blocksList, tagsBlk)
-	blocksList = append(blocksList, qa)
-	blocksList = append(blocksList, approvers)
-	blocksList = append(blocksList, conver)
+	blocksList = append(
+		blocksList,
+		titleBlk,
+		descriptionBlk,
+		servicesBlk,
+		tasksBlk,
+		diffsBlk,
+		tagsBlk,
+		qa,
+		approvers,
+		conver,
+	)
 
 	modalRequest := slackgo.ModalViewRequest{}
 	modalRequest.CallbackID = "hotfix-modal"
