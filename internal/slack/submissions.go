@@ -72,7 +72,8 @@ func HandleHotfixSubmission(client *slackgo.Client) SubmissionHandler {
 
 		//TODO: Test with response_url
 
-		//TODO: Why invalid_block soooooqa
+		//TODO: Check with user intiated slash-command
+
 		a, b, c, err := client.SendMessage(
 			channelID,
 			slackgo.MsgOptionBlocks(message.Blocks.BlockSet...),

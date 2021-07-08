@@ -227,7 +227,7 @@ func CreateHotfixFormRequestMessage() slackgo.ModalViewRequest {
 	// Fuck this verbatim shit!!!!
 	modalRequest.Title = slackgo.NewTextBlockObject(
 		slackgo.PlainTextType,
-		"Test title",
+		"New hotfix",
 		false,
 		false,
 	)
@@ -256,8 +256,8 @@ func CreateHotfixFormResponseMessage(s *HotfixSubmission) slackgo.Message {
 	tasks := "*Task(s):*\n" + makeListItems(s.Tasks)
 	diffs := "*Diff(s):*\n" + makeListItems(s.Diffs)
 	tags := "*Tag(s):*\n" + makeListItems(s.Tags)
-	qa := "*QA(s):*\n" + makeListItems(s.QAs)
-	approvers := "*Approvers:*\n" + "* " + strings.Join(s.Approvers, " ")
+	qa := "*QA(s):*\n" + makeUsers(s.QAs)
+	approvers := "*Approvers:*\n cc " + makeUsers(s.Approvers)
 
 	collectedData = append(
 		collectedData,
@@ -295,4 +295,14 @@ func makeListItems(items []string) string {
 	}
 
 	return strings.Join(listItems, "\n")
+}
+
+func makeUsers(items []string) string {
+	var approversItems []string
+
+	for _, item := range items {
+		approversItems = append(approversItems, "<@"+item+">")
+	}
+
+	return strings.Join(approversItems, " ")
 }
