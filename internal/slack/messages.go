@@ -291,7 +291,7 @@ func makeListItems(items []string) string {
 	var listItems []string
 
 	for _, item := range items {
-		listItems = append(listItems, "* "+item)
+		listItems = append(listItems, "• "+item)
 	}
 
 	return strings.Join(listItems, "\n")
