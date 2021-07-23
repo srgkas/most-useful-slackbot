@@ -1,0 +1,25 @@
+app:
+  port: 8000
+
+replicaCount: 1
+
+image:
+  repository: radykhovskyi/most-useful-slackbot
+  tag: "1.0.0"
+
+service:
+  type: LoadBalancer
+  port: 80
+
+slack_token: "SLACK_TOKEN"
+github_token: "GITHUB_TOKEN"
+# probably move to configmap
+config:
+  services: {"addons":{"github":"addons-api","search-phrase":"api-addons"},"integrations":{"github":"integrations-api","search-phrase":"api-integrations"}}
+  channels: {"hf":"as-deploy-hf","prod":"as-deploy-prod","prod-au":"as-deploy-prod-au"}
+  destination_channel: "as-addons-plat"
+  hf_approval_channel: "as-hotfixes-approval"
+redis:
+  host: redis
+  port: 6379
+  db: 1

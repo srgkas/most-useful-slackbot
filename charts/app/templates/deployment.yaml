@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: {{ .Values.app.port }}
+          env:
+            - name: SERVICES
+              value: {{ .Values.config.services | toJson | quote }}
+            - name: DESTINATION_CHANNEL
+              value: {{ .Values.config.destination_channel }}
+            - name: CHANNELS
+              value: {{ .Values.config.channels | toJson | quote }}
+            - name: HF_APPROVAL_CHANNEL
+              value: {{ .Values.config.hf_approval_channel }}
+            - name: SLACK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: slack_token
+                  name: {{ .Release.Name }}
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: github_token
+                  name: {{ .Release.Name }}
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+            - name: REDIS_PASSWORD
+              value: ""
+            - name: REDIS_DB
+              value: {{ .Values.redis.db | quote }}
+
+
+
