@@ -118,7 +118,8 @@ func (c *Config) GetRedisConf() RedisConfig {
 func InitConfig() *Config {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		// directly passed env variables will be used instead
+		log.Println("Error loading .env file")
 	}
 
 	services := make(map[string]ServiceConf)
